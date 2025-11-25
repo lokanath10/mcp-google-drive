@@ -9,6 +9,64 @@ A server that provides MCP (Machine Control Protocol) interface to interact with
 - OAuth authentication with token persistence
 - HTTP and stdio transport modes
 
+## Quick Start with Docker Compose
+
+The easiest way to get started is using Docker Compose:
+
+### Prerequisites
+
+1. **Docker and Docker Compose** installed on your system
+2. **Google Drive API credentials** - Download `credentials.json` from [Google Cloud Console](https://console.cloud.google.com/)
+3. **Authentication token** - Generate `tokens.json` by running auth setup (see below)
+
+### Setup Steps
+
+1. **Place your files in the project root:**
+   - `credentials.json` - Your Google Drive API credentials
+   - `tokens.json` - Your authentication token (generate if you don't have it)
+
+2. **Generate authentication token (if needed):**
+   ```bash
+   # First, set up a local environment
+   python -m venv venv
+   source venv/bin/activate
+   pip install -e .
+   
+   # Run authentication setup
+   python -m gdrive_mcp_server.auth_setup --credentials credentials.json --token tokens.json
+   ```
+
+3. **Start the server:**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Verify it's running:**
+   ```bash
+   docker-compose logs -f
+   # You should see: "Starting Google Drive MCP server!"
+   ```
+
+5. **Test the connection:**
+   ```bash
+   curl -X POST http://localhost:8000/mcp/v1/initialize \
+     -H "Content-Type: application/json" \
+     -d '{"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0"}}'
+   ```
+
+6. **Stop the server:**
+   ```bash
+   docker-compose down
+   ```
+
+### Configuration
+
+- **Custom port:** Create a `.env` file with `HTTP_PORT=8000` (or your preferred port)
+- **View logs:** `docker-compose logs -f`
+- **Restart:** `docker-compose restart`
+
+The server will be available at `http://localhost:8000` (or your configured port).
+
 ## Requirements
 
 - Python 3.11 or higher
@@ -54,10 +112,7 @@ gdrive-mcp --http
 
 ## Docker Usage
 
-### Prerequisites
-
-1. Ensure you have `credentials.json` and `tokens.json` files in the project root
-2. If you don't have `tokens.json` yet, you can generate it by running the auth setup locally first
+> **Quick Start:** See the [Quick Start with Docker Compose](#quick-start-with-docker-compose) section above for the fastest way to get started.
 
 ### Running with Docker Compose
 
@@ -137,6 +192,31 @@ The project uses:
 Development dependencies can be installed with:
 ```bash
 pip install -e ".[dev]"
+```
+
+## Testing and Examples
+
+### Quick Start
+See [QUICK_START.md](QUICK_START.md) for a 5-minute guide to get started.
+
+### Usage Documentation
+See [MCP_USAGE.md](MCP_USAGE.md) for detailed documentation on:
+- Connecting to the server
+- Listing available tools
+- Calling tools
+- Example code in Python and curl
+
+### Test Scripts
+
+**Python test client:**
+```bash
+# Make sure server is running first
+python test_mcp_client.py
+```
+
+**Bash examples:**
+```bash
+./examples.sh
 ```
 
 ## License
