@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  gdrive-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gdrive-mcp-server
+    ports:
+      - "${HTTP_PORT:-8000}:8000"
+    volumes:
+      # Mount credentials file (required for initial setup)
+      - ./credentials.json:/app/data/credentials.json:ro
+      # Mount token file (generated after auth setup)
+      - ./tokens.json:/app/data/tokens.json
+      # Optional: mount .env file
+      - ./.env:/app/.env:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Override command if needed
+    # For stdio mode: command: ["python", "-m", "gdrive_mcp_server.server", "--token", "/app/data/tokens.json"]
+    # For HTTP mode (default): command: ["python", "-m", "gdrive_mcp_server.server", "--http", "--token", "/app/data/tokens.json"]
+    restart: unless-stopped
+    networks:
+      - gdrive-mcp-network
+
+networks:
+  gdrive-mcp-network:
+    driver: bridge
+
